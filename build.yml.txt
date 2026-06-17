@@ -1,0 +1,39 @@
+name: Build Windows EXE
+
+# Bu dosya, kod GitHub'a her yuklendiginde (push edildiginde)
+# otomatik olarak Windows ortaminda calisir ve .exe dosyasi uretir.
+# Uretilen .exe "Actions" sekmesindeki ilgili calismanin
+# "Artifacts" (Cikti Dosyalari) bolumunden indirilebilir.
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Kod deposunu indir
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Gerekli paketleri yukle
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: EXE olarak derle (PyInstaller)
+        run: |
+          pyinstaller --noconfirm --onefile --windowed --name TekrarliIslemBotu bot_app.py
+
+      - name: Cikti dosyasini yukle (indirilebilir hale getir)
+        uses: actions/upload-artifact@v4
+        with:
+          name: TekrarliIslemBotu-exe
+          path: dist/TekrarliIslemBotu.exe
